@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,113 +6,275 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#020806">
 <title>NUTRO AI</title>
+
 <style>
-*{box-sizing:border-box}
-body{
- margin:0;min-height:100vh;display:flex;align-items:center;
- justify-content:center;flex-direction:column;overflow:hidden;
- background:radial-gradient(ellipse at center,#09251b 0%,#03110c 42%,#010403 100%);
- color:#eafff3;font-family:Arial,sans-serif
+* {
+  box-sizing: border-box;
 }
-h1{font-size:30px;letter-spacing:8px;font-weight:500;margin:0 0 65px}
-.orb{
- width:190px;height:190px;border-radius:50%;position:relative;
- cursor:pointer;display:grid;place-items:center;
- background:radial-gradient(circle at 35% 30%,#baffd5 0%,#20e987 13%,#087b49 38%,#032b1b 68%,#010806 78%);
- box-shadow:0 0 25px #00ff9d,0 0 75px #00b86b, inset -15px -18px 35px #001b11;
- animation:breathe 3s ease-in-out infinite
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  overflow: hidden;
+  background: radial-gradient(
+    ellipse at center,
+    #09251b 0%,
+    #03110c 42%,
+    #010403 100%
+  );
+  color: #eafff3;
+  font-family: Arial, sans-serif;
 }
-.orb:before,.orb:after{
- content:"";position:absolute;inset:-18px;border-radius:50%;
- border:2px solid #22ffad66;animation:spin 9s linear infinite
+
+h1 {
+  font-size: 30px;
+  letter-spacing: 8px;
+  font-weight: 500;
+  margin: 0 0 65px;
 }
-.orb:after{inset:-34px;border-color:#00b97844;animation-duration:14s;animation-direction:reverse}
-.core{width:25px;height:25px;border-radius:50%;background:#d9ffeb;box-shadow:0 0 25px #aaffd2,0 0 60px #00ff95}
-body.listening .orb{box-shadow:0 0 45px #00ff9d,0 0 110px #00ff95}
-body.thinking .orb{animation:breathe .7s ease-in-out infinite}
-.tagline{margin-top:65px;font-size:11px;letter-spacing:4px;color:#7cae91}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes breathe{50%{transform:scale(1.045)}}
+
+.orb {
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(
+    circle at 35% 30%,
+    #baffd5 0%,
+    #20e987 13%,
+    #087b49 38%,
+    #032b1b 68%,
+    #010806 78%
+  );
+  box-shadow:
+    0 0 25px #00ff9d,
+    0 0 75px #00b86b,
+    inset -15px -18px 35px #001b11;
+  animation: breathe 3s ease-in-out infinite;
+}
+
+.orb:before,
+.orb:after {
+  content: "";
+  position: absolute;
+  inset: -18px;
+  border-radius: 50%;
+  border: 2px solid #22ffad66;
+  animation: spin 9s linear infinite;
+}
+
+.orb:after {
+  inset: -34px;
+  border-color: #00b97844;
+  animation-duration: 14s;
+  animation-direction: reverse;
+}
+
+.core {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #d9ffeb;
+  box-shadow: 0 0 25px #aaffd2, 0 0 60px #00ff95;
+}
+
+body.listening .orb {
+  box-shadow: 0 0 45px #00ff9d, 0 0 110px #00ff95;
+}
+
+body.thinking .orb {
+  animation: breathe 0.7s ease-in-out infinite;
+}
+
+.tagline {
+  margin-top: 65px;
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: #7cae91;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes breathe {
+  50% { transform: scale(1.045); }
+}
 </style>
 </head>
+
 <body>
+
 <h1>NUTRO AI</h1>
+
 <div class="orb" id="orb" role="button" aria-label="Tap to speak">
- <div class="core"></div>
+  <div class="core"></div>
 </div>
+
 <div class="tagline">YOUR LIVING INTELLIGENCE</div>
 
 <script>
-const API_URL = "https://nutro-ai-brain.theerankrish08.workers.dev";
+
+const API_URL =
+"https://nutro-ai-brain.theerankrish08.workers.dev/";
 
 const orb = document.getElementById("orb");
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-function speak(text){
-  if(!("speechSynthesis" in window)){
-    alert(text);
+const SpeechRecognition =
+window.SpeechRecognition ||
+window.webkitSpeechRecognition;
+
+function speak(message) {
+  if (!("speechSynthesis" in window)) {
+    alert(message);
     return;
   }
+
   speechSynthesis.cancel();
-  const voice = new SpeechSynthesisUtterance(text);
+
+  const voice = new SpeechSynthesisUtterance(
+    String(message).slice(0, 1200)
+  );
+
   voice.lang = "en-IN";
   voice.rate = 1;
+  voice.pitch = 1;
+
   speechSynthesis.speak(voice);
 }
 
-async function askNutro(message){
+async function askNutro(message) {
+
   document.body.classList.add("thinking");
-  try{
-    const response = await fetch(API_URL,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({message})
+
+  try {
+
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: message
+      })
     });
-    const data = await response.json();
-    if(!response.ok) throw new Error(data.error || "Server error");
-    if(!data.answer) throw new Error("No answer received");
+
+    const raw = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      throw new Error(
+        "Server returned an invalid response. HTTP " +
+        response.status
+      );
+    }
+
+    if (!response.ok) {
+      const details =
+        data.details || data.error || "Unknown server error";
+
+      const status =
+        data.upstreamStatus
+          ? " Gemini status " + data.upstreamStatus
+          : "";
+
+      throw new Error(
+        details + status + ". HTTP " + response.status
+      );
+    }
+
+    if (!data.answer) {
+      throw new Error(
+        "The AI server returned no answer."
+      );
+    }
+
     speak(data.answer);
-  }catch(error){
-    console.error(error);
-    speak("I couldn't connect right now. Please try again.");
-  }finally{
+
+  } catch (error) {
+
+    console.error("NUTRO AI ERROR:", error);
+
+    speak(
+      "NUTRO connection error. " + error.message
+    );
+
+  } finally {
+
     document.body.classList.remove("thinking");
+
   }
 }
 
-orb.addEventListener("click",()=>{
-  if(!SpeechRecognition){
-    speak("Speech recognition is not supported in this browser. Please use Chrome.");
+orb.addEventListener("click", () => {
+
+  if (!SpeechRecognition) {
+    speak(
+      "Speech recognition is not supported. Please use Google Chrome."
+    );
     return;
   }
-  if(!navigator.onLine){
+
+  if (!navigator.onLine) {
     speak("Please connect to the internet.");
     return;
   }
 
   const recognition = new SpeechRecognition();
+
   recognition.lang = "en-IN";
   recognition.continuous = false;
   recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
 
-  recognition.onstart = ()=>{
+  recognition.onstart = () => {
     document.body.classList.add("listening");
   };
-  recognition.onend = ()=>{
+
+  recognition.onend = () => {
     document.body.classList.remove("listening");
-  };
-  recognition.onerror = ()=>{
-    document.body.classList.remove("listening");
-    speak("I couldn't hear you. Tap the orb and try again.");
-  };
-  recognition.onresult = (event)=>{
-    const message = event.results[0][0].transcript;
-    askNutro(message);
   };
 
-  try{recognition.start();}
-  catch(error){speak("Please wait a moment and tap again.");}
+  recognition.onerror = (event) => {
+
+    document.body.classList.remove("listening");
+
+    speak(
+      "Microphone error: " + event.error
+    );
+
+  };
+
+  recognition.onresult = (event) => {
+
+    const message =
+      event.results[0][0].transcript;
+
+    console.log("User:", message);
+
+    askNutro(message);
+
+  };
+
+  try {
+    recognition.start();
+  } catch (error) {
+    speak("Please wait and tap the orb again.");
+  }
+
 });
+
 </script>
+
 </body>
 </html>
