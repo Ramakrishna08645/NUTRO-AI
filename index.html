@@ -1,52 +1,117 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#030b08">
-  <meta name="description" content="NUTRO AI — Your living intelligence">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <title>NUTRO AI</title>
-  <style>
-    :root { color-scheme: dark; --green:#75f0ae; --muted:#a6c6b4; }
-    * { box-sizing:border-box; }
-    html, body { margin:0; min-height:100%; }
-    body {
-      min-height:100svh; overflow:hidden; display:grid; place-items:center;
-      background: radial-gradient(ellipse at 50% 48%, #0b3322 0%, #06170f 42%, #020806 78%);
-      color:#effff5; font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
-    }
-    main {
-      width:min(100%,560px); min-height:100svh; display:flex; flex-direction:column;
-      align-items:center; justify-content:center; padding:32px 22px; text-align:center;
-    }
-    .wordmark { font-size:clamp(25px,6vw,34px); font-weight:750; letter-spacing:.22em; margin:0 0 54px 0; }
-    .wordmark span { color:var(--green); }
-    .orb-wrap { position:relative; width:min(70vw,330px); aspect-ratio:1; display:grid; place-items:center; margin-bottom:58px; }
-    .ring { position:absolute; inset:4%; border:1px solid rgba(117,240,174,.35); border-radius:46% 54% 52% 48%; animation:spin 19s linear infinite; }
-    .ring.r2 { inset:11%; border-width:2px; border-color:rgba(117,240,174,.55); transform:rotate(35deg); animation:spinback 25s linear infinite; }
-    .ring.r3 { inset:18%; border-color:rgba(117,240,174,.24); animation:spin 14s linear infinite; }
-    .orb {
-      width:58%; aspect-ratio:1; border-radius:50%;
-      background: radial-gradient(circle at 34% 28%, #d2ffe1 0%, #72f5ad 9%, #20b96d 35%, #075b37 67%, #012516 100%);
-      box-shadow: 0 0 35px #38df8a88, 0 0 95px #20c87555, inset -18px -22px 35px #001b10aa, inset 8px 8px 25px #d6ffe477;
-      animation:breathe 4s ease-in-out infinite;
-    }
-    .tagline { margin:0; color:var(--muted); font-size:clamp(12px,3vw,15px); letter-spacing:.24em; text-transform:uppercase; }
-    @keyframes breathe { 0%,100% { transform:scale(.96); filter:brightness(.92); } 50% { transform:scale(1.04); filter:brightness(1.14); } }
-    @keyframes spin { to { transform:rotate(360deg); } }
-    @keyframes spinback { to { transform:rotate(-360deg); } }
-    @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation:none!important; } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#020806">
+<title>NUTRO AI</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;min-height:100vh;display:flex;align-items:center;
+ justify-content:center;flex-direction:column;overflow:hidden;
+ background:radial-gradient(ellipse at center,#09251b 0%,#03110c 42%,#010403 100%);
+ color:#eafff3;font-family:Arial,sans-serif
+}
+h1{font-size:30px;letter-spacing:8px;font-weight:500;margin:0 0 65px}
+.orb{
+ width:190px;height:190px;border-radius:50%;position:relative;
+ cursor:pointer;display:grid;place-items:center;
+ background:radial-gradient(circle at 35% 30%,#baffd5 0%,#20e987 13%,#087b49 38%,#032b1b 68%,#010806 78%);
+ box-shadow:0 0 25px #00ff9d,0 0 75px #00b86b, inset -15px -18px 35px #001b11;
+ animation:breathe 3s ease-in-out infinite
+}
+.orb:before,.orb:after{
+ content:"";position:absolute;inset:-18px;border-radius:50%;
+ border:2px solid #22ffad66;animation:spin 9s linear infinite
+}
+.orb:after{inset:-34px;border-color:#00b97844;animation-duration:14s;animation-direction:reverse}
+.core{width:25px;height:25px;border-radius:50%;background:#d9ffeb;box-shadow:0 0 25px #aaffd2,0 0 60px #00ff95}
+body.listening .orb{box-shadow:0 0 45px #00ff9d,0 0 110px #00ff95}
+body.thinking .orb{animation:breathe .7s ease-in-out infinite}
+.tagline{margin-top:65px;font-size:11px;letter-spacing:4px;color:#7cae91}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes breathe{50%{transform:scale(1.045)}}
+</style>
 </head>
 <body>
-  <main aria-label="NUTRO AI">
-    <h1 class="wordmark">NUTRO <span>AI</span></h1>
-    <div class="orb-wrap" role="img" aria-label="Glowing emerald NUTRO AI orb">
-      <div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div><div class="orb"></div>
-    </div>
-    <p class="tagline">Your living intelligence</p>
-  </main>
+<h1>NUTRO AI</h1>
+<div class="orb" id="orb" role="button" aria-label="Tap to speak">
+ <div class="core"></div>
+</div>
+<div class="tagline">YOUR LIVING INTELLIGENCE</div>
+
+<script>
+const API_URL = "https://nutro-ai-brain.theerankrish08.workers.dev";
+
+const orb = document.getElementById("orb");
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+function speak(text){
+  if(!("speechSynthesis" in window)){
+    alert(text);
+    return;
+  }
+  speechSynthesis.cancel();
+  const voice = new SpeechSynthesisUtterance(text);
+  voice.lang = "en-IN";
+  voice.rate = 1;
+  speechSynthesis.speak(voice);
+}
+
+async function askNutro(message){
+  document.body.classList.add("thinking");
+  try{
+    const response = await fetch(API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({message})
+    });
+    const data = await response.json();
+    if(!response.ok) throw new Error(data.error || "Server error");
+    if(!data.answer) throw new Error("No answer received");
+    speak(data.answer);
+  }catch(error){
+    console.error(error);
+    speak("I couldn't connect right now. Please try again.");
+  }finally{
+    document.body.classList.remove("thinking");
+  }
+}
+
+orb.addEventListener("click",()=>{
+  if(!SpeechRecognition){
+    speak("Speech recognition is not supported in this browser. Please use Chrome.");
+    return;
+  }
+  if(!navigator.onLine){
+    speak("Please connect to the internet.");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-IN";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = ()=>{
+    document.body.classList.add("listening");
+  };
+  recognition.onend = ()=>{
+    document.body.classList.remove("listening");
+  };
+  recognition.onerror = ()=>{
+    document.body.classList.remove("listening");
+    speak("I couldn't hear you. Tap the orb and try again.");
+  };
+  recognition.onresult = (event)=>{
+    const message = event.results[0][0].transcript;
+    askNutro(message);
+  };
+
+  try{recognition.start();}
+  catch(error){speak("Please wait a moment and tap again.");}
+});
+</script>
 </body>
 </html>
